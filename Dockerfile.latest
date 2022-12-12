@@ -1,0 +1,19 @@
+FROM alpine:latest
+
+RUN apk add --no-cache git build-base gfortran cmake openmpi openmpi-dev netcdf netcdf-dev netcdf-fortran netcdf-fortran-dev python3
+RUN cd /opt \
+    && git clone https://github.com/schism-dev/schism \
+    && cd /opt/schism \
+    && mkdir /schism && cd /schism \
+    && cmake /opt/schism/src -DTVD_LIM=VL \
+    && make \
+    && rm CMakeCache.txt && cmake /opt/schism/src -DTVD_LIM=VL -DPREC_EVAP=on \
+    && make \
+    && rm CMakeCache.txt && cmake /opt/schism/src -DTVD_LIM=VL -DUSE_WWM=on \
+    && make \
+    && rm CMakeCache.txt && cmake /opt/schism/src -DTVD_LIM=VL -DUSE_WWM=on -DPREC_EVAP=on \
+    && make \
+    && rm -rf /opt/schism
+ENV PATH=/schism/bin:$PATH
+WORKDIR /mnt
+CMD ["/bin/sh"]
